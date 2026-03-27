@@ -1,0 +1,27 @@
+/* public/css/app.css */
+
+/* Configuración base de checkboxes para ancho completo */
+input[type="checkbox"] {
+    accent-color: #32CD32;
+}
+
+/* MEJORA: CSS para girar la flecha en menús colapsables puro CSS */
+
+/* Ocultar la flecha por defecto del navegador en details */
+details > summary::-webkit-details-marker {
+    display: none;
+}
+details > summary {
+    list-style: none;
+    outline: none; /* Eliminar borde de enfoque */
+}
+
+/* Cuando details está abierto (open), girar el SVG dentro del summary */
+details[open] summary svg {
+    transform: rotate(-180deg);
+}
+
+/* Transición suave para el giro */
+details summary svg {
+    transition: transform 0.2s ease-in-out;
+}
