@@ -9,31 +9,45 @@ use App\Models\User;
 class AuthController extends Controller
 {
     public function showLogin() {
-        // Si ya está logueado, lo mandamos a donde corresponde
+        // Si ya está logueado, redirigimos según su rol
         if (Auth::check()) {
-            return (Auth::user()->rol === 'admin') ? redirect('/admin/dashboard') : redirect('/catalogo');
+            return (Auth::user()->rol === 'admin') 
+                ? redirect('/admin/dashboard') 
+                : redirect('/catalogo');
         }
         return view('auth.login');
     }
 
     public function login(Request $request) {
-        // Buscamos el usuario en la tabla 'usuarios'
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
+
+        // Buscamos al usuario en la tabla 'usuarios' con la nueva estructura
+        // Nota: En producción las contraseñas deben estar encriptadas (Hash::check)
         $user = User::where('email', $request->email)
-                    ->where('password', $request->password)
+                    ->where('password', $request->password) 
                     ->first();
 
         if ($user) {
             Auth::login($user);
             $request->session()->regenerate();
             
-            // Redirigir según el campo 'rol' de tu SQL
+            // Guardamos la sucursal en la sesión para usarla en ventas y stock
+            session(['sucursal_id' => $user->sucursal_id]);
+
+            // Redirigir según el campo 'rol' (admin o vendedor)
             if ($user->rol === 'admin') {
                 return redirect()->intended('/admin/dashboard');
             }
+            
             return redirect()->intended('/catalogo');
         }
 
-        return back()->withErrors(['email' => 'El correo o la contraseña no coinciden con nuestros registros.']);
+        return back()->withErrors([
+            'email' => 'Las credenciales no coinciden con nuestros registros de Romartex.',
+        ]);
     }
 
     public function logout(Request $request) {

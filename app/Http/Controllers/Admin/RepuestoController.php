@@ -16,14 +16,29 @@ class RepuestoController extends Controller
     ];
 
     public function index($tipo) {
-        if (!array_key_exists($tipo, $this->tablas)) return redirect()->route('admin.dashboard');
+        if (!array_key_exists($tipo, $this->tablas)) {
+            return redirect()->route('admin.dashboard');
+        }
+
         $nombreTabla = $this->tablas[$tipo];
-        $repuestos = DB::table($nombreTabla)
-            ->join('productos', $nombreTabla . '.producto_id', '=', 'productos.id')
-            ->join('producto_marcas', 'productos.id', '=', 'producto_marcas.producto_id')
-            ->join('marcas', 'producto_marcas.marca_id', '=', 'marcas.id')
-            ->select('productos.*', 'marcas.nombre as marca_nombre', 'producto_marcas.precio_dolares', 'producto_marcas.marca_id', $nombreTabla . '.*')
+
+        $repuestos = DB::table('producto_marcas')
+            ->join('productos', 'productos.id', '=', 'producto_marcas.producto_id')
+            ->join($nombreTabla, 'productos.id', '=', $nombreTabla . '.producto_id')
+            ->leftJoin('marcas', 'producto_marcas.marca_id', '=', 'marcas.id')
+            ->select(
+                'producto_marcas.id as pm_id', 
+                'productos.id as producto_id',
+                'productos.codigo_interno',
+                'productos.descripcion',
+                'productos.imagen',
+                'marcas.nombre as marca_nombre',
+                'producto_marcas.precio_lista_dolares',
+                $nombreTabla . '.*' // Trae todas las columnas técnicas (dientes, voltaje, delgas, etc.)
+            )
+            ->where('productos.tipo', $tipo)
             ->get();
+
         return view('admin.repuestos.index', compact('repuestos', 'tipo'));
     }
 
@@ -35,6 +50,7 @@ class RepuestoController extends Controller
     public function store(Request $request, $tipo) {
         $nombreTabla = $this->tablas[$tipo];
         $nombreImagen = null;
+
         if ($request->hasFile('imagen')) {
             $file = $request->file('imagen');
             $nombreImagen = $tipo . '_' . time() . '.' . $file->getClientOriginalExtension();
@@ -43,85 +59,139 @@ class RepuestoController extends Controller
 
         DB::transaction(function () use ($request, $tipo, $nombreTabla, $nombreImagen) {
             $productoId = DB::table('productos')->insertGetId([
-                'tipo' => $tipo, 'codigo' => $request->codigo, 'descripcion' => $request->descripcion, 'imagen' => $nombreImagen
+                'tipo' => $tipo,
+                'codigo_interno' => $request->codigo_interno,
+                'descripcion' => $request->descripcion,
+                'imagen' => $nombreImagen
             ]);
 
-            $datosTecnicos = $this->mapearDatosTecnicos($request, $tipo, $productoId);
+            $datosTecnicos = ['producto_id' => $productoId];
+
+            if ($tipo == 'bendix') {
+                $datosTecnicos += [
+                    'codigo_zen' => $request->codigo_zen,
+                    'dientes' => $request->dientes,
+                    'diametro_externo' => $request->diametro_externo,
+                    'diametro_interno' => $request->diametro_interno,
+                    'estrias' => $request->estrias,
+                    'largo' => $request->largo,
+                    'sentido' => $request->sentido,
+                ];
+            } elseif ($tipo == 'inducido') {
+                $datosTecnicos += [
+                    'voltaje' => $request->voltaje,
+                    'largo' => $request->largo,
+                    'diametro_externo' => $request->diametro_externo,
+                    'estrias' => $request->estrias,
+                    'delgas' => $request->delgas,
+                    'codigo_original' => $request->codigo_original,
+                ];
+            } elseif ($tipo == 'regulador') {
+                $datosTecnicos += [
+                    'sistema' => $request->sistema,
+                    'voltaje' => $request->voltaje,
+                    'terminales' => $request->terminales,
+                    'circuito' => $request->circuito,
+                    'capacitor' => $request->has('capacitor') ? 1 : 0,
+                ];
+            }
+
             DB::table($nombreTabla)->insert($datosTecnicos);
 
             DB::table('producto_marcas')->insert([
-                'producto_id' => $productoId, 'marca_id' => $request->marca_id, 'precio_dolares' => $request->precio
+                'producto_id' => $productoId,
+                'marca_id' => $request->marca_id,
+                'precio_lista_dolares' => $request->precio_lista_dolares
             ]);
         });
-        return redirect()->route('admin.repuestos.index', $tipo);
+
+        return redirect()->route('admin.repuestos.index', $tipo)->with('success', 'Repuesto creado correctamente.');
     }
 
     public function edit($tipo, $id) {
         $nombreTabla = $this->tablas[$tipo];
         $marcas = DB::table('marcas')->get();
-        $repuesto = DB::table($nombreTabla)
-            ->join('productos', $nombreTabla . '.producto_id', '=', 'productos.id')
-            ->join('producto_marcas', 'productos.id', '=', 'producto_marcas.producto_id')
-            ->select('productos.*', 'producto_marcas.precio_dolares as precio', 'producto_marcas.marca_id', $nombreTabla . '.*')
-            ->where('productos.id', $id)
+
+        $repuesto = DB::table('producto_marcas')
+            ->join('productos', 'productos.id', '=', 'producto_marcas.producto_id')
+            ->join($nombreTabla, 'productos.id', '=', $nombreTabla . '.producto_id')
+            ->select(
+                'productos.*',
+                'producto_marcas.id as pm_id',
+                'producto_marcas.precio_lista_dolares',
+                'producto_marcas.marca_id',
+                $nombreTabla . '.*'
+            )
+            ->where('producto_marcas.id', $id)
             ->first();
+
+        if (!$repuesto) return redirect()->route('admin.repuestos.index', $tipo);
+
         return view('admin.repuestos.edit', compact('tipo', 'marcas', 'repuesto'));
     }
 
     public function update(Request $request, $tipo, $id) {
         $nombreTabla = $this->tablas[$tipo];
-        $producto = DB::table('productos')->where('id', $id)->first();
+        $pm = DB::table('producto_marcas')->where('id', $id)->first();
+        if (!$pm) return back();
 
-        $nombreImagen = $producto->imagen;
-        if ($request->hasFile('imagen')) {
-            if ($nombreImagen && File::exists(public_path('imagenes/' . $nombreImagen))) File::delete(public_path('imagenes/' . $nombreImagen));
-            $file = $request->file('imagen');
-            $nombreImagen = $tipo . '_' . time() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('imagenes'), $nombreImagen);
-        }
+        $productoId = $pm->producto_id;
 
-        DB::transaction(function () use ($request, $tipo, $id, $nombreTabla, $nombreImagen) {
-            DB::table('productos')->where('id', $id)->update([
-                'codigo' => $request->codigo, 'descripcion' => $request->descripcion, 'imagen' => $nombreImagen
+        DB::transaction(function () use ($request, $tipo, $nombreTabla, $productoId, $id) {
+            DB::table('productos')->where('id', $productoId)->update([
+                'codigo_interno' => $request->codigo_interno,
+                'descripcion' => $request->descripcion
             ]);
 
-            $datosTecnicos = $this->mapearDatosTecnicos($request, $tipo, $id);
-            DB::table($nombreTabla)->where('producto_id', $id)->update($datosTecnicos);
+            $datosTecnicos = [];
+            if ($tipo == 'bendix') {
+                $datosTecnicos = [
+                    'codigo_zen' => $request->codigo_zen,
+                    'dientes' => $request->dientes,
+                    'diametro_externo' => $request->diametro_externo,
+                    'diametro_interno' => $request->diametro_interno,
+                    'estrias' => $request->estrias,
+                    'largo' => $request->largo,
+                    'sentido' => $request->sentido,
+                ];
+            } elseif ($tipo == 'inducido') {
+                $datosTecnicos = [
+                    'voltaje' => $request->voltaje,
+                    'largo' => $request->largo,
+                    'diametro_externo' => $request->diametro_externo,
+                    'estrias' => $request->estrias,
+                    'delgas' => $request->delgas,
+                    'codigo_original' => $request->codigo_original,
+                ];
+            } elseif ($tipo == 'regulador') {
+                $datosTecnicos = [
+                    'sistema' => $request->sistema,
+                    'voltaje' => $request->voltaje,
+                    'terminales' => $request->terminales,
+                    'circuito' => $request->circuito,
+                    'capacitor' => $request->has('capacitor') ? 1 : 0,
+                ];
+            }
 
-            DB::table('producto_marcas')->where('producto_id', $id)->update([
-                'marca_id' => $request->marca_id, 'precio_dolares' => $request->precio
+            DB::table($nombreTabla)->where('producto_id', $productoId)->update($datosTecnicos);
+
+            DB::table('producto_marcas')->where('id', $id)->update([
+                'marca_id' => $request->marca_id,
+                'precio_lista_dolares' => $request->precio_lista_dolares
             ]);
         });
-        return redirect()->route('admin.repuestos.index', $tipo);
+
+        return redirect()->route('admin.repuestos.index', $tipo)->with('success', 'Actualizado correctamente');
     }
 
     public function destroy($id) {
-        $producto = DB::table('productos')->where('id', $id)->first();
-        if ($producto->imagen && File::exists(public_path('imagenes/' . $producto->imagen))) {
-            File::delete(public_path('imagenes/' . $producto->imagen));
-        }
-        DB::table('productos')->where('id', $id)->delete();
-        return back();
-    }
+        $pm = DB::table('producto_marcas')->where('id', $id)->first();
+        if (!$pm) return back();
 
-    private function mapearDatosTecnicos($request, $tipo, $productoId) {
-        $datos = ['producto_id' => $productoId];
-        if ($tipo === 'bendix') {
-            return array_merge($datos, [
-                'dientes' => $request->dientes, 'estrias' => $request->estrias, 'sentido' => $request->sentido,
-                'diametro_externo' => $request->diametro_externo, 'diametro_interno' => $request->diametro_interno, 'largo' => $request->largo,
-            ]);
-        } elseif ($tipo === 'inducido') {
-            return array_merge($datos, [
-                'voltaje' => $request->voltaje, 'largo' => $request->largo, 'diametro' => $request->diametro,
-                'estrias' => $request->estrias, 'delgas' => $request->delgas, 'codigo_original' => $request->codigo_original,
-            ]);
-        } elseif ($tipo === 'regulador') {
-            return array_merge($datos, [
-                'sistema' => $request->sistema, 'voltaje' => $request->voltaje, 'terminales' => $request->terminales,
-                'circuito' => $request->circuito, 'capacitor' => $request->has('capacitor') ? 1 : 0,
-            ]);
-        }
-        return $datos;
+        $enVenta = DB::table('detalle_ventas')->where('producto_marca_id', $id)->exists();
+        if ($enVenta) return back()->with('error', 'No se puede eliminar, ya fue vendido');
+
+        DB::table('producto_marcas')->where('id', $id)->delete();
+        return back()->with('success', 'Eliminado correctamente');
     }
 }

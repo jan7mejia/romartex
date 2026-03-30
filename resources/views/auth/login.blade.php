@@ -18,7 +18,7 @@
             @csrf
             <div>
                 <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 ml-1">Correo Electrónico</label>
-                <input type="email" name="email" required placeholder="admin@romartex.com"
+                <input type="email" name="email" required placeholder="admin@romartexsc1.com"
                     class="w-full px-5 py-4 bg-[#121212] border border-gray-800 rounded-2xl text-white focus:ring-2 focus:ring-[#4ade80] focus:border-transparent outline-none transition-all placeholder:text-gray-700">
             </div>
 
