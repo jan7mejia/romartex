@@ -4,7 +4,7 @@
 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
     <div>
         <h2 class="text-5xl font-black capitalize text-white tracking-tight">Gestión de {{ $tipo }}</h2>
-        <p class="text-slate-300 font-medium text-xl mt-2">Inventario técnico especializado - Romartex</p>
+        <p class="text-slate-300 font-medium text-xl mt-2">Inventario por Marca y Sucursal - Romartex</p>
     </div>
 
     <div class="flex gap-4">
@@ -32,7 +32,8 @@
             <tr>
                 <th class="p-6">Vista</th>
                 <th class="p-6">Identificación</th>
-                <th class="p-6">Especificaciones</th>
+                <th class="p-6 text-center">Stock Sucursal</th>
+                <th class="p-6">Especificaciones Técnicas Completas</th>
                 <th class="p-6">Precio</th>
                 <th class="p-6 text-center">Acciones</th>
             </tr>
@@ -55,51 +56,56 @@
 
             {{-- IDENTIFICACIÓN --}}
             <td class="p-6">
-                <div class="flex flex-col gap-3">
-                    <span class="text-sm text-slate-400 font-mono uppercase">Ref #{{ $r->pm_id }}</span>
-
-                    <span class="bg-blue-500/20 border border-blue-500/40 px-4 py-2 rounded-xl text-blue-300 text-2xl font-black w-fit">
+                <div class="flex flex-col gap-2">
+                    <span class="text-xs text-slate-500 font-mono">ID PM: #{{ $r->pm_id }}</span>
+                    <span class="bg-blue-500/20 border border-blue-500/40 px-4 py-1 rounded-xl text-blue-300 text-xl font-black w-fit">
                         {{ $r->codigo_interno }}
                     </span>
-
-                    <span class="text-white font-bold text-lg uppercase">
+                    <span class="text-white font-bold text-lg uppercase tracking-wide">
                         {{ $r->marca_nombre }}
                     </span>
                 </div>
             </td>
 
-            {{-- ESPECIFICACIONES --}}
+            {{-- STOCK POR SUCURSAL --}}
             <td class="p-6">
-                <div class="flex flex-wrap gap-3 max-w-xl text-base">
+                <div class="flex flex-col items-center justify-center bg-slate-950 p-4 rounded-3xl border border-slate-800 min-w-[100px]">
+                    <span class="text-[10px] text-slate-500 uppercase font-black mb-1">Disponible</span>
+                    <span class="{{ $r->stock_sucursal > 0 ? 'text-green-400' : 'text-red-500' }} text-4xl font-black font-mono">
+                        {{ $r->stock_sucursal }}
+                    </span>
+                </div>
+            </td>
 
+            {{-- ESPECIFICACIONES TÉCNICAS (TODAS) --}}
+            <td class="p-6">
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                    
                     @if($tipo == 'bendix')
-                        <span class="bg-slate-800 px-3 py-2 rounded-xl">Dientes: <b>{{ $r->dientes }}</b></span>
-                        <span class="bg-slate-800 px-3 py-2 rounded-xl">Sentido: <b>{{ $r->sentido }}</b></span>
-                        <span class="bg-slate-800 px-3 py-2 rounded-xl">Estrías: <b>{{ $r->estrias }}</b></span>
-                        <span class="bg-slate-800 px-3 py-2 rounded-xl">ZEN: <b>{{ $r->codigo_zen ?? 'N/A' }}</b></span>
-
-                        <div class="w-full grid grid-cols-3 gap-2 mt-2 text-sm">
-                            <span class="bg-slate-800 px-3 py-2 rounded-lg">Ø Ext: <b>{{ $r->diametro_externo }}</b></span>
-                            <span class="bg-slate-800 px-3 py-2 rounded-lg">Ø Int: <b>{{ $r->diametro_interno }}</b></span>
-                            <span class="bg-slate-800 px-3 py-2 rounded-lg">Largo: <b>{{ $r->largo }}</b></span>
-                        </div>
+                        <div class="bg-slate-800/50 p-2 rounded-lg border border-slate-700">Dientes: <b class="text-white text-sm">{{ $r->dientes }}</b></div>
+                        <div class="bg-slate-800/50 p-2 rounded-lg border border-slate-700">Estrías: <b class="text-white text-sm">{{ $r->estrias }}</b></div>
+                        <div class="bg-slate-800/50 p-2 rounded-lg border border-slate-700">Sentido: <b class="text-white text-sm">{{ $r->sentido }}</b></div>
+                        <div class="bg-slate-800/50 p-2 rounded-lg border border-slate-700">Largo: <b class="text-white text-sm">{{ $r->largo }}mm</b></div>
+                        <div class="bg-slate-800/50 p-2 rounded-lg border border-slate-700">Ø Ext: <b class="text-white text-sm">{{ $r->diametro_externo }}mm</b></div>
+                        <div class="bg-slate-800/50 p-2 rounded-lg border border-slate-700">Ø Int: <b class="text-white text-sm">{{ $r->diametro_interno }}mm</b></div>
+                        <div class="bg-slate-800/50 p-2 rounded-lg border border-slate-700 col-span-2 text-blue-400">Cod. ZEN: <b>{{ $r->codigo_zen ?? 'N/A' }}</b></div>
 
                     @elseif($tipo == 'inducido')
-                        <span class="bg-slate-800 px-3 py-2 rounded-xl">Voltaje: <b>{{ $r->voltaje }}V</b></span>
-                        <span class="bg-slate-800 px-3 py-2 rounded-xl">Largo: <b>{{ $r->largo }}</b></span>
-                        <span class="bg-slate-800 px-3 py-2 rounded-xl">Ø Ext: <b>{{ $r->diametro_externo }}</b></span>
-                        <span class="bg-slate-800 px-3 py-2 rounded-xl">Estrías: <b>{{ $r->estrias }}</b></span>
-                        <span class="bg-slate-800 px-3 py-2 rounded-xl">Delgas: <b>{{ $r->delgas ?? 'N/A' }}</b></span>
+                        <div class="bg-slate-800/50 p-2 rounded-lg border border-slate-700">Voltaje: <b class="text-white text-sm">{{ $r->voltaje }}V</b></div>
+                        <div class="bg-slate-800/50 p-2 rounded-lg border border-slate-700">Largo: <b class="text-white text-sm">{{ $r->largo }}mm</b></div>
+                        <div class="bg-slate-800/50 p-2 rounded-lg border border-slate-700">Ø Ext: <b class="text-white text-sm">{{ $r->diametro_externo }}mm</b></div>
+                        <div class="bg-slate-800/50 p-2 rounded-lg border border-slate-700">Estrías: <b class="text-white text-sm">{{ $r->estrias }}</b></div>
+                        <div class="bg-slate-800/50 p-2 rounded-lg border border-slate-700">Delgas: <b class="text-white text-sm">{{ $r->delgas ?? 'N/A' }}</b></div>
+                        <div class="bg-slate-800/50 p-2 rounded-lg border border-slate-700 col-span-2 text-blue-400">Cod. Original: <b>{{ $r->codigo_original ?? 'N/A' }}</b></div>
 
                     @elseif($tipo == 'regulador')
-                        <span class="bg-slate-800 px-3 py-2 rounded-xl">Sistema: <b>{{ $r->sistema }}</b></span>
-                        <span class="bg-slate-800 px-3 py-2 rounded-xl">Voltaje: <b>{{ $r->voltaje }}V</b></span>
-                        <span class="bg-slate-800 px-3 py-2 rounded-xl">Terminales: <b>{{ $r->terminales }}</b></span>
-                        <span class="bg-slate-800 px-3 py-2 rounded-xl">Circuito: <b>{{ $r->circuito }}</b></span>
-
-                        <span class="bg-slate-800 px-3 py-2 rounded-xl">
-                            {{ $r->capacitor ? 'Con capacitor' : 'Sin capacitor' }}
-                        </span>
+                        <div class="bg-slate-800/50 p-2 rounded-lg border border-slate-700">Sistema: <b class="text-white text-sm">{{ $r->sistema }}</b></div>
+                        <div class="bg-slate-800/50 p-2 rounded-lg border border-slate-700">Voltaje: <b class="text-white text-sm">{{ $r->voltaje }}V</b></div>
+                        <div class="bg-slate-800/50 p-2 rounded-lg border border-slate-700">Terminales: <b class="text-white text-sm">{{ $r->terminales }}</b></div>
+                        <div class="bg-slate-800/50 p-2 rounded-lg border border-slate-700">Circuito: <b class="text-white text-sm">{{ $r->circuito }}</b></div>
+                        <div class="bg-slate-800/50 p-2 rounded-lg border border-slate-700 col-span-2">
+                            Capacitor: <b class="{{ $r->capacitor ? 'text-green-400' : 'text-slate-500' }}">{{ $r->capacitor ? 'SÍ' : 'NO' }}</b>
+                        </div>
                     @endif
 
                 </div>
@@ -108,7 +114,7 @@
             {{-- PRECIO --}}
             <td class="p-6">
                 <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800">
-                    <span class="text-green-400 font-black text-3xl font-mono">
+                    <span class="text-emerald-400 font-black text-2xl font-mono">
                         ${{ number_format($r->precio_lista_dolares, 2) }}
                     </span>
                 </div>
@@ -116,31 +122,43 @@
 
             {{-- ACCIONES --}}
             <td class="p-6">
-                <div class="flex justify-center gap-3">
-                    
-                    <a href="{{ route('admin.repuestos.edit', [$tipo, $r->pm_id]) }}"
-                       class="bg-blue-600 p-4 rounded-2xl hover:scale-110 transition text-xl shadow-lg">
-                        ✏️
-                    </a>
+                <div class="flex flex-col items-center gap-2">
+                    <div class="flex justify-center gap-2">
+                        <a href="{{ route('admin.repuestos.edit', [$tipo, $r->pm_id]) }}"
+                           class="bg-blue-600 p-3 rounded-xl hover:scale-110 transition text-lg shadow-lg">
+                           ✏️
+                        </a>
 
-                    <form action="{{ route('admin.repuestos.destroy', $r->pm_id) }}" method="POST"
-                          onsubmit="return confirm('¿Eliminar este repuesto?')">
-                        @csrf @method('DELETE')
-                        <button class="bg-red-600 p-4 rounded-2xl hover:scale-110 transition text-xl shadow-lg">
-                            🗑️
-                        </button>
-                    </form>
+                        @if($r->es_eliminable)
+                            <form action="{{ route('admin.repuestos.destroy', $r->pm_id) }}" method="POST"
+                                  onsubmit="return confirm('¿Estás seguro de eliminar este repuesto?')">
+                                @csrf @method('DELETE')
+                                <button class="bg-red-600 p-3 rounded-xl hover:scale-110 transition text-lg shadow-lg">
+                                    🗑️
+                                </button>
+                            </form>
+                        @else
+                            <button class="bg-slate-700 p-3 rounded-xl cursor-not-allowed opacity-50 text-lg" title="No se puede borrar: tiene ventas asociadas">
+                                🔒
+                            </button>
+                        @endif
+                    </div>
 
+                    @if(!$r->es_eliminable)
+                        <span class="text-[9px] text-red-500 font-bold uppercase tracking-tighter bg-red-500/10 px-2 py-1 rounded border border-red-500/20">
+                            Bloqueado (Vendido)
+                        </span>
+                    @endif
                 </div>
             </td>
 
         </tr>
         @empty
         <tr>
-            <td colspan="5" class="p-24 text-center">
+            <td colspan="6" class="p-24 text-center">
                 <div class="flex flex-col items-center gap-4 opacity-40">
                     <span class="text-8xl">📦</span>
-                    <p class="text-white text-2xl font-bold">No hay registros</p>
+                    <p class="text-white text-2xl font-bold">No hay registros en esta sucursal</p>
                 </div>
             </td>
         </tr>

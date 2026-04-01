@@ -24,8 +24,7 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
-        // Buscamos al usuario en la tabla 'usuarios' con la nueva estructura
-        // Nota: En producción las contraseñas deben estar encriptadas (Hash::check)
+        // Buscamos al usuario en la tabla 'usuarios' 
         $user = User::where('email', $request->email)
                     ->where('password', $request->password) 
                     ->first();
