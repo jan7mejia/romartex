@@ -7,26 +7,27 @@
         <p class="text-slate-300 font-medium text-xl mt-2">Inventario por Marca y Sucursal - Romartex</p>
     </div>
 
-    <div class="flex gap-4">
-        <a href="{{ route('admin.dashboard') }}" class="bg-slate-800 text-white px-6 py-3 rounded-2xl font-bold hover:bg-slate-700 transition border border-slate-700 shadow-lg flex items-center gap-2 text-lg">
-            ⬅ Volver
-        </a>
+    <div class="flex flex-col md:flex-row gap-4 items-end">
+        {{-- Buscador en Tiempo Real --}}
+        <div class="relative w-full md:w-80">
+            <input type="text" id="filtroCodigo" placeholder="🔍 Buscar por código..." 
+                class="w-full bg-slate-800 border border-slate-700 text-white rounded-2xl px-5 py-3 focus:border-blue-500 outline-none shadow-inner font-bold">
+        </div>
 
-        <a href="{{ route('admin.repuestos.create', $tipo) }}" class="bg-green-500 text-black px-6 py-3 rounded-2xl font-black hover:bg-green-400 transition shadow-lg shadow-green-500/20 uppercase tracking-wider text-lg">
-            + Nuevo {{ $tipo }}
-        </a>
+        <div class="flex gap-4">
+            <a href="{{ route('admin.dashboard') }}" class="bg-slate-800 text-white px-6 py-3 rounded-2xl font-bold hover:bg-slate-700 transition border border-slate-700 shadow-lg flex items-center gap-2 text-lg">
+                ⬅ Volver
+            </a>
+
+            <a href="{{ route('admin.repuestos.create', $tipo) }}" class="bg-green-500 text-black px-6 py-3 rounded-2xl font-black hover:bg-green-400 transition shadow-lg shadow-green-500/20 uppercase tracking-wider text-lg">
+                + Nuevo {{ $tipo }}
+            </a>
+        </div>
     </div>
 </div>
 
-@if(session('error') || session('success'))
-<div class="mb-8 p-6 {{ session('error') ? 'bg-red-500/10 border-red-500/50 text-red-400' : 'bg-green-500/10 border-green-500/50 text-green-400' }} border-2 rounded-2xl flex items-center gap-4 font-bold text-xl">
-    <span class="text-2xl">{{ session('error') ? '⚠️' : '✅' }}</span>
-    <p>{{ session('error') ?? session('success') }}</p>
-</div>
-@endif
-
 <div class="bg-slate-900 rounded-[2rem] border border-slate-800 overflow-hidden shadow-2xl">
-    <table class="w-full text-left border-collapse">
+    <table class="w-full text-left border-collapse" id="tablaRepuestos">
         
         <thead class="bg-slate-950 text-slate-400 text-sm uppercase tracking-wider border-b border-slate-800">
             <tr>
@@ -41,7 +42,7 @@
 
         <tbody class="divide-y divide-slate-800/50">
         @forelse($repuestos as $r)
-        <tr class="hover:bg-blue-500/[0.05] transition-all group">
+        <tr class="hover:bg-blue-500/[0.05] transition-all group fila-repuesto">
 
             {{-- IMAGEN --}}
             <td class="p-6">
@@ -58,7 +59,7 @@
             <td class="p-6">
                 <div class="flex flex-col gap-2">
                     <span class="text-xs text-slate-500 font-mono">ID PM: #{{ $r->pm_id }}</span>
-                    <span class="bg-blue-500/20 border border-blue-500/40 px-4 py-1 rounded-xl text-blue-300 text-xl font-black w-fit">
+                    <span class="bg-blue-500/20 border border-blue-500/40 px-4 py-1 rounded-xl text-blue-300 text-xl font-black w-fit codigo-interno-texto">
                         {{ $r->codigo_interno }}
                     </span>
                     <span class="text-white font-bold text-lg uppercase tracking-wide">
@@ -77,10 +78,9 @@
                 </div>
             </td>
 
-            {{-- ESPECIFICACIONES TÉCNICAS (TODAS) --}}
+            {{-- ESPECIFICACIONES TÉCNICAS --}}
             <td class="p-6">
                 <div class="grid grid-cols-2 gap-2 text-xs">
-                    
                     @if($tipo == 'bendix')
                         <div class="bg-slate-800/50 p-2 rounded-lg border border-slate-700">Dientes: <b class="text-white text-sm">{{ $r->dientes }}</b></div>
                         <div class="bg-slate-800/50 p-2 rounded-lg border border-slate-700">Estrías: <b class="text-white text-sm">{{ $r->estrias }}</b></div>
@@ -107,7 +107,6 @@
                             Capacitor: <b class="{{ $r->capacitor ? 'text-green-400' : 'text-slate-500' }}">{{ $r->capacitor ? 'SÍ' : 'NO' }}</b>
                         </div>
                     @endif
-
                 </div>
             </td>
 
@@ -143,12 +142,6 @@
                             </button>
                         @endif
                     </div>
-
-                    @if(!$r->es_eliminable)
-                        <span class="text-[9px] text-red-500 font-bold uppercase tracking-tighter bg-red-500/10 px-2 py-1 rounded border border-red-500/20">
-                            Bloqueado (Vendido)
-                        </span>
-                    @endif
                 </div>
             </td>
 
@@ -167,4 +160,23 @@
 
     </table>
 </div>
+
+<script>
+    document.getElementById('filtroCodigo').addEventListener('input', function() {
+        const val = this.value.toLowerCase().trim();
+        const filas = document.querySelectorAll('.fila-repuesto');
+        
+        filas.forEach(fila => {
+            const codigoTexto = fila.querySelector('.codigo-interno-texto');
+            if (codigoTexto) {
+                const codigo = codigoTexto.innerText.toLowerCase();
+                if(codigo.includes(val)) {
+                    fila.style.display = '';
+                } else {
+                    fila.style.display = 'none';
+                }
+            }
+        });
+    });
+</script>
 @endsection

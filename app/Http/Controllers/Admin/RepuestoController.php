@@ -56,12 +56,11 @@ class RepuestoController extends Controller
 
     public function store(Request $request, $tipo) {
         $request->validate([
-            'codigo_interno' => 'required|unique:productos,codigo_interno',
+            'codigo_interno' => 'required', 
             'marca_id' => 'required',
             'precio_lista_dolares' => 'required|numeric',
             'imagen' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
         ], [
-            'codigo_interno.unique' => 'Este código ya existe. Por favor, usa uno diferente.',
             'codigo_interno.required' => 'Debes escribir un código para el repuesto.',
             'marca_id.required' => 'Por favor, selecciona una marca.',
             'precio_lista_dolares.numeric' => 'El precio debe ser un número.',
@@ -69,29 +68,14 @@ class RepuestoController extends Controller
 
         $nombreTabla = $this->tablas[$tipo];
 
-        $existeDuplicado = DB::table($nombreTabla)
-            ->join('producto_marcas', $nombreTabla . '.producto_id', '=', 'producto_marcas.producto_id')
+        $existeDuplicadoIdentico = DB::table('productos')
+            ->join('producto_marcas', 'productos.id', '=', 'producto_marcas.producto_id')
+            ->where('productos.codigo_interno', $request->codigo_interno)
             ->where('producto_marcas.marca_id', $request->marca_id)
-            ->where(function($query) use ($tipo, $request) {
-                if ($tipo == 'bendix') {
-                    $query->where('dientes', $request->dientes)
-                          ->where('estrias', $request->estrias)
-                          ->where('largo', $request->largo)
-                          ->where('sentido', $request->sentido);
-                } elseif ($tipo == 'inducido') {
-                    $query->where('voltaje', $request->voltaje)
-                          ->where('largo', $request->largo)
-                          ->where('estrias', $request->estrias)
-                          ->where('delgas', $request->delgas);
-                } elseif ($tipo == 'regulador') {
-                    $query->where('sistema', $request->sistema)
-                          ->where('voltaje', $request->voltaje)
-                          ->where('terminales', $request->terminales);
-                }
-            })->exists();
+            ->exists();
 
-        if ($existeDuplicado) {
-            return back()->withErrors(['error' => '¡Atención! Ya existe un repuesto de ESTA MARCA con las mismas características técnicas.'])->withInput();
+        if ($existeDuplicadoIdentico) {
+            return back()->withErrors(['error' => '¡Error! Ya existe este código registrado para la marca seleccionada.'])->withInput();
         }
 
         $nombreImagen = null;
@@ -156,7 +140,7 @@ class RepuestoController extends Controller
             ]);
         });
 
-        return redirect()->route('admin.repuestos.index', $tipo)->with('success', 'Guardado exitosamente.');
+        return redirect()->route('admin.repuestos.index', $tipo)->with('success', 'Repuesto registrado con éxito.');
     }
 
     public function edit($tipo, $id) {
@@ -194,10 +178,8 @@ class RepuestoController extends Controller
         $productoActual = DB::table('productos')->where('id', $productoId)->first();
 
         $request->validate([
-            'codigo_interno' => 'required|unique:productos,codigo_interno,' . $productoId,
+            'codigo_interno' => 'required',
             'precio_lista_dolares' => 'required|numeric',
-        ], [
-            'codigo_interno.unique' => 'Ese código ya lo tiene otro repuesto.',
         ]);
 
         $nombreImagen = $productoActual->imagen;
@@ -241,7 +223,7 @@ class RepuestoController extends Controller
             );
         });
 
-        return redirect()->route('admin.repuestos.index', $tipo)->with('success', 'Cambios guardados.');
+        return redirect()->route('admin.repuestos.index', $tipo)->with('success', 'Repuesto actualizado correctamente.');
     }
 
     public function destroy($id) {

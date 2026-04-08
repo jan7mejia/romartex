@@ -177,7 +177,6 @@
             @endif
         </div>
 
-        {{-- BOTONES LIMPIOS SIN ICONOS --}}
         <div class="flex flex-col md:flex-row gap-4 pt-4">
             <button type="submit" class="flex-1 bg-yellow-500 text-black font-black py-4 rounded-2xl uppercase hover:bg-yellow-400 transition-all shadow-lg shadow-yellow-500/20">
                 Guardar Cambios
