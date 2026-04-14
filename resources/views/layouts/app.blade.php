@@ -24,31 +24,32 @@
         }
     </script>
 
-    {{-- Importar Iconos de Heroicons --}}
-    <script defer src="https://unpkg.com/heroicons@v2.0.18/24/outline/index.js"></script>
-
     {{-- Importar CSS Puro Separado --}}
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
 
-    @stack('styles') {{-- Espacio para CSS extra de páginas específicas --}}
+    @stack('styles')
 </head>
 <body class="bg-custom-bg-body font-sans antialiased text-gray-900 text-lg">
 
-    {{-- Espacio RESERVADO para el Header --}}
+    {{-- Header --}}
     @include('components.header')
 
-    {{-- Espacio RESERVADO para el Contenido Principal --}}
-    <main class="w-[95%] mx-auto py-12 flex gap-12">
+    {{-- Contenedor Principal Ajustado: Se aumentó el max-width para ocupar más pantalla --}}
+    <main class="max-w-[1800px] mx-auto px-4 py-10 flex gap-8">
 
-        {{-- Espacio RESERVADO para el Sidebar --}}
-        @include('components.sidebar')
+        {{-- Sidebar con Ancho Aumentado (w-96) para reducir espacios blancos a la izquierda --}}
+        <div class="w-96 flex-shrink-0">
+            <div class="sticky top-32">
+                @include('components.sidebar')
+            </div>
+        </div>
 
-        {{-- Espacio RESERVADO para el Catálogo de Productos --}}
-        <div class="flex-1">
+        {{-- Contenido del Catálogo --}}
+        <div class="flex-1 min-w-0">
             @yield('content')
         </div>
     </main>
 
-    @stack('scripts') {{-- Espacio para JS extra de páginas específicas --}}
+    @stack('scripts')
 </body>
 </html>

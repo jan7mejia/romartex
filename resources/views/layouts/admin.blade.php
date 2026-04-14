@@ -12,7 +12,8 @@
 </head>
 <body class="bg-admin-dark text-white font-sans">
     <div class="flex min-h-screen">
-        <aside class="w-64 bg-slate-900 border-r border-slate-800 p-6">
+        {{-- Mejora: Se agregó 'sticky top-0' y 'h-screen' para que no se mueva al bajar --}}
+        <aside class="w-64 bg-slate-900 border-r border-slate-800 p-6 sticky top-0 h-screen overflow-y-auto">
             <h1 class="text-2xl font-black italic text-green-400 mb-10">ROMARTEX ADMIN</h1>
             <nav class="space-y-4">
                 <a href="{{ route('admin.dashboard') }}" class="block p-3 rounded-lg hover:bg-slate-800 transition">📊 Dashboard</a>

@@ -84,7 +84,6 @@ class AdminController extends Controller
             ->join('producto_marcas', 'detalle_ventas.producto_marca_id', '=', 'producto_marcas.id')
             ->join('productos', 'producto_marcas.producto_id', '=', 'productos.id')
             ->join('marcas', 'producto_marcas.marca_id', '=', 'marcas.id')
-            // Joins para traer TODAS las especificaciones de cada tipo
             ->leftJoin('bendix', 'productos.id', '=', 'bendix.producto_id')
             ->leftJoin('inducidos', 'productos.id', '=', 'inducidos.producto_id')
             ->leftJoin('reguladores', 'productos.id', '=', 'reguladores.producto_id')
@@ -93,19 +92,17 @@ class AdminController extends Controller
                 'productos.tipo',
                 'marcas.nombre as marca_nombre',
                 'detalle_ventas.cantidad',
+                'detalle_ventas.precio_lista', // <--- AGREGADO
                 'detalle_ventas.precio_final_cobrado as precio_final',
                 DB::raw('(detalle_ventas.cantidad * detalle_ventas.precio_final_cobrado) as subtotal'),
                 
-                // ESPECIFICACIONES BENDIX
                 'bendix.codigo_zen', 'bendix.dientes', 'bendix.estrias', 'bendix.sentido', 
                 'bendix.diametro_externo as b_ext', 'bendix.diametro_interno as b_int', 'bendix.largo as b_largo',
                 
-                // ESPECIFICACIONES INDUCIDOS
                 'inducidos.voltaje as i_voltaje', 'inducidos.largo as i_largo', 
                 'inducidos.diametro_externo as i_ext', 'inducidos.estrias as i_estrias', 
                 'inducidos.delgas as i_delgas', 'inducidos.codigo_original as i_original',
                 
-                // ESPECIFICACIONES REGULADORES
                 'reguladores.sistema as r_sistema', 'reguladores.voltaje as r_voltaje', 
                 'reguladores.terminales as r_term', 'reguladores.circuito as r_circuito', 'reguladores.capacitor as r_cap'
             )

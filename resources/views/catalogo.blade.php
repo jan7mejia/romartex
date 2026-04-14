@@ -1,86 +1,58 @@
-{{-- resources/views/catalogo.blade.php --}}
-
-{{-- 1. Heredar del Layout Base --}}
 @extends('layouts.app')
 
-{{-- 2. Definir Título de esta Página --}}
-@section('title', 'Catálogo Completo | LARAVEL PARTS')
+@section('title', 'Catálogo Real | ROMARTEX')
 
-{{-- 3. Insertar Contenido Principal --}}
 @section('content')
-    <div class="mb-12 pb-8 border-b border-gray-200">
-        <h1 class="text-5xl font-extrabold mb-3 text-gray-950 tracking-tight">Catálogo de Autopartes</h1>
-        <p class="text-gray-600 text-xl max-w-3xl">Encuentra las partes que necesitas con filtros avanzados y precisión garantizada.</p>
-    </div>
+    {{-- Notificaciones removidas de aquí para usar Modales --}}
 
-    {{-- Grid de Productos Fluid Adaptable --}}
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
-
-        {{-- Datos de Productos (Sección PHP limpia) --}}
-        @php
-            $productos = [
-                [ 'id' => 1, 'imagen' => 'https://via.placeholder.com/350x250/E5E7EB/000000?text=MOTOR+ARRANQUE', 'categoria' => 'Inducidos', 'nombre' => 'Motor de Arranque Toyota Corolla', 'marca' => 'Bosch', 'precio_oferta' => '125.99', 'precio_lista' => '189.99', 'descuento' => '-34%', 'agotado' => false ],
-                [ 'id' => 2, 'imagen' => 'https://via.placeholder.com/350x250/E5E7EB/000000?text=ALTERNADOR', 'categoria' => 'Reguladores', 'nombre' => 'Alternador Chevrolet Aveo', 'marca' => 'Delco', 'precio_oferta' => '85.50', 'precio_lista' => null, 'descuento' => null, 'agotado' => false ],
-                [ 'id' => 3, 'imagen' => 'https://via.placeholder.com/350x250/E5E7EB/000000?text=RELAY', 'categoria' => 'Reguladores', 'nombre' => 'Relay Regulador de Voltaje Universal Denso', 'marca' => 'Denso', 'precio_oferta' => '45.00', 'precio_lista' => '60.00', 'descuento' => '-25%', 'agotado' => true ],
-                [ 'id' => 4, 'imagen' => 'https://via.placeholder.com/350x250/E5E7EB/000000?text=BOBINA', 'categoria' => 'Inducidos', 'nombre' => 'Bobina de Encendido Nissan Sentra B15', 'marca' => 'Nippondenso', 'precio_oferta' => '95.75', 'precio_lista' => null, 'descuento' => null, 'agotado' => false ],
-                [ 'id' => 5, 'imagen' => 'https://via.placeholder.com/350x250/E5E7EB/000000?text=EMBRAGUE', 'categoria' => 'Inducidos', 'nombre' => 'Kit de Embrague Completo', 'marca' => 'Bosch', 'precio_oferta' => '210.00', 'precio_lista' => '299.99', 'descuento' => '-30%', 'agotado' => false ],
-                [ 'id' => 6, 'imagen' => 'https://via.placeholder.com/350x250/E5E7EB/000000?text=BOMBA+AGUA', 'categoria' => 'Reguladores', 'nombre' => 'Bomba de Agua Alta Presión', 'marca' => 'Delco', 'precio_oferta' => '120.20', 'precio_lista' => null, 'descuento' => null, 'agotado' => false ],
-                [ 'id' => 7, 'imagen' => 'https://via.placeholder.com/350x250/E5E7EB/000000?text=SENSOR', 'categoria' => 'Reguladores', 'nombre' => 'Sensor de Oxígeno', 'marca' => 'Denso', 'precio_oferta' => '65.00', 'precio_lista' => '89.50', 'descuento' => '-27%', 'agotado' => false ],
-                [ 'id' => 8, 'imagen' => 'https://via.placeholder.com/350x250/E5E7EB/000000?text=PASTILLAS', 'categoria' => 'Inducidos', 'nombre' => 'Pastillas de Freno', 'marca' => 'Nippondenso', 'precio_oferta' => '105.75', 'precio_lista' => null, 'descuento' => null, 'agotado' => false ],
-            ];
-        @endphp
-
-        @foreach($productos as $producto)
-            {{-- Tarjeta de Producto Modularizable --}}
-            <div class="bg-white rounded-3xl border border-gray-100 shadow hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col group relative">
-                {{-- Imagen y Badges --}}
-                <div class="relative w-full h-60 overflow-hidden bg-gray-50 border-b border-gray-100">
-                    <img src="{{ $producto['imagen'] }}" alt="{{ $producto['nombre'] }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-
-                    {{-- Badge Descuento --}}
-                    @if($producto['descuento'])
-                        <span class="absolute top-4 left-4 bg-custom-brand text-black font-extrabold text-sm px-4 py-1.5 rounded-full shadow-md z-10">
-                            {{ $producto['descuento'] }}
-                        </span>
-                    @endif
-
-                    {{-- Overlay AGOTADO --}}
-                    @if($producto['agotado'])
-                        <div class="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center z-20">
-                            <span class="text-white font-extrabold text-2xl tracking-widest uppercase">Agotado</span>
-                        </div>
-                    @endif
-                </div>
-
-                {{-- Detalles del Producto --}}
-                <div class="p-6 flex flex-col flex-grow text-base">
-                    <p class="text-custom-text-muted text-sm font-medium uppercase tracking-wider mb-2">{{ $producto['categoria'] }}</p>
-                    <h3 class="font-semibold text-gray-950 mb-2 line-clamp-2 h-16 text-xl group-hover:text-custom-brand transition-colors">{{ $producto['nombre'] }}</h3>
-                    <p class="text-custom-text-muted text-sm mb-5 font-mono">{{ $producto['marca'] }}</p>
-
-                    {{-- Precios --}}
-                    <div class="flex items-baseline gap-3.5 mt-auto mb-6 pb-4 border-b border-gray-100">
-                        <span class="text-3xl font-extrabold text-gray-950">${{ $producto['precio_oferta'] }}</span>
-                        @if($producto['precio_lista'])
-                            <span class="text-lg text-gray-500 line-through">${{ $producto['precio_lista'] }}</span>
-                        @endif
-                    </div>
-
-                    {{-- Botón de Acción --}}
-                    @if($producto['agotado'])
-                        <button disabled class="w-full flex items-center justify-center gap-3 bg-gray-200 text-gray-500 font-bold py-3.5 px-6 rounded-xl cursor-not-allowed">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
-                            No disponible
-                        </button>
-                    @else
-                        <button class="w-full flex items-center justify-center gap-3 bg-black text-white font-bold py-3.5 px-6 rounded-xl hover:bg-gray-800 transition transform hover:-translate-y-0.5 active:translate-y-0 shadow-md">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
-                            Ver Detalles
-                        </button>
-                    @endif
-                </div>
+    {{-- Encabezado --}}
+    <div class="mb-10 p-8 rounded-[2rem] bg-gradient-to-r from-[#111419] to-[#1a1f26] border border-gray-800 shadow-2xl flex flex-col md:flex-row md:items-end md:justify-between gap-6 relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-custom-brand/5 rounded-full blur-[100px] -mr-32 -mt-32"></div>
+        <div class="relative z-10">
+            <h1 class="text-5xl md:text-6xl font-black text-white tracking-tighter uppercase italic leading-none mb-3">
+                Catálogo de <span class="text-custom-brand drop-shadow-[0_0_15px_rgba(16,185,129,0.3)]">Autopartes</span>
+            </h1>
+            <p class="text-gray-400 font-bold flex items-center gap-3 uppercase text-sm tracking-widest">
+                <span class="flex h-3 w-3 relative">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-custom-brand opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-custom-brand"></span>
+                </span>
+                Stock en tiempo real: <span class="text-white bg-white/10 px-3 py-0.5 rounded-lg border border-white/10">{{ count($productos) }} ítems en esta sucursal</span>
+            </p>
+        </div>
+        <div class="relative z-10 flex flex-col items-start md:items-end gap-2">
+            {{-- Mejora: Identificador de Sucursal Dinámico --}}
+            <span class="text-[11px] font-black text-custom-brand uppercase tracking-[0.4em] opacity-80">
+                Terminal de Inventario: Nodo-0{{ auth()->user()->sucursal_id }}
+            </span>
+            <div class="h-1.5 w-48 bg-gray-900 rounded-full border border-gray-800 overflow-hidden shadow-inner">
+                <div class="h-full bg-gradient-to-r from-custom-brand to-green-400 w-3/4 shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
             </div>
-        @endforeach
-
+            {{-- Mejora: Status con referencia a la sucursal actual --}}
+            <span class="text-[10px] text-gray-500 font-mono italic">
+                Status: Online // Sucursal_{{ auth()->user()->sucursal_id == 1 ? 'CENTRAL' : 'NORTE' }} // v2.6
+            </span>
+        </div>
     </div>
+
+    {{-- Grid de Productos --}}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        @forelse($productos as $producto)
+            @include('vendedor._card_producto')
+        @empty
+            <div class="col-span-full py-32 text-center bg-[#111419] rounded-[3rem] border border-dashed border-gray-800">
+                <h3 class="text-3xl font-black text-gray-600 uppercase italic tracking-tighter">Sin productos vinculados</h3>
+                <p class="text-gray-500 mt-2 font-bold uppercase text-xs tracking-widest">
+                    Solo se muestran productos registrados por el administrador de esta sucursal.
+                </p>
+            </div>
+        @endforelse
+    </div>
+
+    {{-- Fragmentos de Modales y Scripts --}}
+    @include('vendedor._modales_catalogo')
+    @include('vendedor._scripts_catalogo')
+
+    {{-- CDN de SweetAlert2 --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 @endsection

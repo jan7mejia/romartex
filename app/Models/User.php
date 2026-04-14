@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class User extends Authenticatable
 {
@@ -12,14 +13,29 @@ class User extends Authenticatable
     protected $table = 'usuarios';
 
     protected $fillable = [
-        'nombre', 'apellido', 'email', 'password', 'rol', 'celular', 'sucursal_id'
+        'nombre', 
+        'apellido', 
+        'email', 
+        'password', 
+        'rol', 
+        'celular', 
+        'sucursal_id'
     ];
 
     protected $hidden = [
-        'password', 'remember_token',
+        'password', 
+        'remember_token',
     ];
 
-    // ESTO CORRIGE EL ERROR DE BCRYPT PARA TUS DATOS MANUALES
+    /**
+     * Relación con la sucursal.
+     * Permite acceder al nombre de la sucursal desde el Header.
+     */
+    public function sucursal(): BelongsTo
+    {
+        return $this->belongsTo(Sucursal::class, 'sucursal_id');
+    }
+
     public function getAuthPassword()
     {
         return $this->password;

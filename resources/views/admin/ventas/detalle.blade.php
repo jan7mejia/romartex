@@ -60,10 +60,10 @@
                     <thead class="bg-slate-950/80 backdrop-blur-md text-slate-400 text-xs uppercase tracking-[0.15em]">
                         <tr>
                             <th class="p-8">Detalle Técnico del Repuesto</th>
-                            <th class="p-8 text-center">Tipo</th>
                             <th class="p-8 text-center">Cantidad</th>
-                            <th class="p-8 text-right font-mono">P. Unitario</th>
-                            <th class="p-8 text-right font-mono">Subtotal</th>
+                            <th class="p-8 text-right font-mono">P. Lista</th> {{-- CAMBIADO --}}
+                            <th class="p-8 text-right font-mono">P. Final</th> {{-- CAMBIADO --}}
+                            <th class="p-8 text-right font-mono text-blue-500">Subtotal</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-800">
@@ -74,9 +74,10 @@
                                     <div class="flex items-center gap-3 mb-1">
                                         <span class="text-white font-black text-2xl tracking-tight">{{ $d->codigo }}</span>
                                         <span class="bg-yellow-500/10 text-yellow-500 text-[10px] px-3 py-1 rounded-full font-black uppercase border border-yellow-500/20">{{ $d->marca_nombre }}</span>
+                                        <span class="bg-slate-800 text-slate-400 text-[9px] px-2 py-1 rounded-md font-bold uppercase">{{ $d->tipo }}</span>
                                     </div>
                                     
-                                    {{-- CARACTERÍSTICAS TÉCNICAS MEJORADAS --}}
+                                    {{-- CARACTERÍSTICAS TÉCNICAS --}}
                                     <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2 bg-slate-950/60 p-5 rounded-2xl border border-slate-800/60 shadow-inner">
                                         @if($d->tipo == 'bendix')
                                             <div class="flex gap-2 text-sm"><span class="text-slate-500 font-bold uppercase text-[10px] w-20">Cód. Zen:</span> <span class="text-slate-200 font-medium">{{ $d->codigo_zen ?? 'N/A' }}</span></div>
@@ -103,15 +104,16 @@
                                 </div>
                             </td>
                             <td class="p-8 text-center">
-                                <span class="bg-slate-800 text-slate-300 px-4 py-2 rounded-xl text-[11px] font-black uppercase border border-slate-700 tracking-tighter">
-                                    {{ $d->tipo }}
-                                </span>
-                            </td>
-                            <td class="p-8 text-center">
                                 <span class="text-white font-black text-3xl">{{ $d->cantidad }}</span>
                             </td>
-                            <td class="p-8 text-right font-mono text-slate-400 text-lg">
+                            <td class="p-8 text-right font-mono text-slate-500 text-lg line-through italic">
+                                ${{ number_format($d->precio_lista, 2) }}
+                            </td>
+                            <td class="p-8 text-right font-mono {{ $d->precio_final < $d->precio_lista ? 'text-yellow-500' : 'text-white' }} text-xl font-bold">
                                 ${{ number_format($d->precio_final, 2) }}
+                                @if($d->precio_final < $d->precio_lista)
+                                    <span class="block text-[10px] uppercase text-yellow-600 font-black tracking-tighter mt-1">Regateado</span>
+                                @endif
                             </td>
                             <td class="p-8 text-right font-mono text-green-400 text-3xl font-black italic">
                                 ${{ number_format($d->subtotal, 2) }}
